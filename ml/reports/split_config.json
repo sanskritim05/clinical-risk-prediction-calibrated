@@ -1,0 +1,8 @@
+{
+  "method": "group_split_by_patient",
+  "patient_col": "patient_nbr",
+  "seed": 42,
+  "train_frac": 0.70,
+  "val_frac": 0.15,
+  "test_frac": 0.15
+}
