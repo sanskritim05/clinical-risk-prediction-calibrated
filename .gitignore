@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (do NOT commit)
+ml/data/raw/
+ml/data/processed/
+*.csv
+*.tsv
+*.parquet
+*.xlsx
+
+# Models / artifacts (optional: keep OUT, or include only final ones)
+*.joblib
+*.pkl
+
+# OS
+.DS_Store
+
+# Frontend
+node_modules/
+dist/
+build/
