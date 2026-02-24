@@ -1,0 +1,126 @@
+{
+  "top_positive": [
+    {
+      "feature": "discharge_disposition_id_Discharged/transferred within this institution to Medicare approved swing bed",
+      "value": 0.0,
+      "shap": 0.6332648396492004
+    },
+    {
+      "feature": "discharge_disposition_id_Discharged/transferred to another rehab fac including rehab units of a hospital .",
+      "value": 0.0,
+      "shap": 0.5483384728431702
+    },
+    {
+      "feature": "discharge_disposition_id_Admitted as an inpatient to this hospital",
+      "value": 0.0,
+      "shap": 0.4403553307056427
+    },
+    {
+      "feature": "discharge_disposition_id_Discharged/transferred/referred to a psychiatric hospital of psychiatric distinct part unit of a hospital",
+      "value": 0.0,
+      "shap": 0.41503235697746277
+    },
+    {
+      "feature": "discharge_disposition_id_Discharged/transferred to another short term hospital",
+      "value": 0.0,
+      "shap": 0.4126715660095215
+    },
+    {
+      "feature": "discharge_disposition_id_Discharged/transferred to another type of inpatient care institution",
+      "value": 0.0,
+      "shap": 0.34751787781715393
+    },
+    {
+      "feature": "diag_1_group_other",
+      "value": 0.0,
+      "shap": 0.3355002999305725
+    },
+    {
+      "feature": "diag_2_group_neoplasms",
+      "value": 0.0,
+      "shap": 0.28370556235313416
+    },
+    {
+      "feature": "admission_source_id_HMO Referral",
+      "value": 0.0,
+      "shap": 0.239231139421463
+    },
+    {
+      "feature": "diag_3_group_neoplasms",
+      "value": 0.0,
+      "shap": 0.19310110807418823
+    },
+    {
+      "feature": "diag_3_group_genitourinary",
+      "value": 0.0,
+      "shap": 0.19292475283145905
+    },
+    {
+      "feature": "diag_2_group_diabetes",
+      "value": 0.0,
+      "shap": 0.14024728536605835
+    }
+  ],
+  "top_negative": [
+    {
+      "feature": "discharge_disposition_id_Expired",
+      "value": 0.0,
+      "shap": -3.1618852615356445
+    },
+    {
+      "feature": "discharge_disposition_id_Hospice / medical facility",
+      "value": 0.0,
+      "shap": -0.7047107219696045
+    },
+    {
+      "feature": "discharge_disposition_id_Hospice / home",
+      "value": 0.0,
+      "shap": -0.46332430839538574
+    },
+    {
+      "feature": "discharge_disposition_id_Discharged/transferred to a long term care hospital.",
+      "value": 0.0,
+      "shap": -0.3568541407585144
+    },
+    {
+      "feature": "age_[0-10)",
+      "value": 0.0,
+      "shap": -0.18731969594955444
+    },
+    {
+      "feature": "num_lab_procedures",
+      "value": -0.11084131132428202,
+      "shap": -0.1689828485250473
+    },
+    {
+      "feature": "diag_1_group_respiratory",
+      "value": 0.0,
+      "shap": -0.16080549359321594
+    },
+    {
+      "feature": "age_[60-70)",
+      "value": 1.0,
+      "shap": -0.12560626864433289
+    },
+    {
+      "feature": "diabetesMed_No",
+      "value": 1.0,
+      "shap": -0.11546219140291214
+    },
+    {
+      "feature": "discharge_disposition_id_Discharged/transferred to home under care of Home IV provider",
+      "value": 0.0,
+      "shap": -0.11403517425060272
+    },
+    {
+      "feature": "admission_source_id_Transfer from a Skilled Nursing Facility (SNF)",
+      "value": 0.0,
+      "shap": -0.10824622213840485
+    },
+    {
+      "feature": "admission_type_id_Not Available",
+      "value": 0.0,
+      "shap": -0.10519975423812866
+    }
+  ]
+}

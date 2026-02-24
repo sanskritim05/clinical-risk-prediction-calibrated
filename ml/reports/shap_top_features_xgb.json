@@ -1,0 +1,102 @@
+[
+  {
+    "feature": "discharge_disposition_id_Expired",
+    "mean_abs_shap": 2.976651668548584
+  },
+  {
+    "feature": "discharge_disposition_id_Hospice / medical facility",
+    "mean_abs_shap": 0.8626757264137268
+  },
+  {
+    "feature": "discharge_disposition_id_Discharged/transferred within this institution to Medicare approved swing bed",
+    "mean_abs_shap": 0.6528301239013672
+  },
+  {
+    "feature": "discharge_disposition_id_Discharged/transferred to another rehab fac including rehab units of a hospital .",
+    "mean_abs_shap": 0.5563110709190369
+  },
+  {
+    "feature": "discharge_disposition_id_Admitted as an inpatient to this hospital",
+    "mean_abs_shap": 0.4635502099990845
+  },
+  {
+    "feature": "discharge_disposition_id_Discharged/transferred/referred to a psychiatric hospital of psychiatric distinct part unit of a hospital",
+    "mean_abs_shap": 0.439245343208313
+  },
+  {
+    "feature": "discharge_disposition_id_Hospice / home",
+    "mean_abs_shap": 0.35483264923095703
+  },
+  {
+    "feature": "discharge_disposition_id_Discharged/transferred to a long term care hospital.",
+    "mean_abs_shap": 0.31357234716415405
+  },
+  {
+    "feature": "diag_2_group_neoplasms",
+    "mean_abs_shap": 0.2964969873428345
+  },
+  {
+    "feature": "discharge_disposition_id_Discharged/transferred to another type of inpatient care institution",
+    "mean_abs_shap": 0.2911933958530426
+  },
+  {
+    "feature": "discharge_disposition_id_Discharged/transferred to another short term hospital",
+    "mean_abs_shap": 0.27479222416877747
+  },
+  {
+    "feature": "diag_1_group_other",
+    "mean_abs_shap": 0.2514190077781677
+  },
+  {
+    "feature": "admission_source_id_HMO Referral",
+    "mean_abs_shap": 0.2315187305212021
+  },
+  {
+    "feature": "diag_3_group_neoplasms",
+    "mean_abs_shap": 0.22336198389530182
+  },
+  {
+    "feature": "diag_2_group_diabetes",
+    "mean_abs_shap": 0.1969274878501892
+  },
+  {
+    "feature": "diag_3_group_genitourinary",
+    "mean_abs_shap": 0.18492020666599274
+  },
+  {
+    "feature": "number_inpatient",
+    "mean_abs_shap": 0.1765855997800827
+  },
+  {
+    "feature": "age_[0-10)",
+    "mean_abs_shap": 0.16954825818538666
+  },
+  {
+    "feature": "num_lab_procedures",
+    "mean_abs_shap": 0.15916040539741516
+  },
+  {
+    "feature": "diag_1_group_respiratory",
+    "mean_abs_shap": 0.14754235744476318
+  },
+  {
+    "feature": "admission_type_id_NULL",
+    "mean_abs_shap": 0.14327092468738556
+  },
+  {
+    "feature": "discharge_disposition_id_Discharged/transferred to SNF",
+    "mean_abs_shap": 0.1342034935951233
+  },
+  {
+    "feature": "admission_type_id_Not Available",
+    "mean_abs_shap": 0.13144925236701965
+  },
+  {
+    "feature": "diabetesMed_No",
+    "mean_abs_shap": 0.13013271987438202
+  },
+  {
+    "feature": "discharge_disposition_id_Discharged/transferred to home under care of Home IV provider",
+    "mean_abs_shap": 0.11268141120672226
+  }
+]
