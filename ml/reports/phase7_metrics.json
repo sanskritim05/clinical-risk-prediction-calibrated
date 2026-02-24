@@ -1,0 +1,39 @@
+{
+  "filter": {
+    "excluded_discharge_disposition": [
+      "Expired",
+      "Hospice / home",
+      "Hospice / medical facility"
+    ]
+  },
+  "baseline_full_cohort": {
+    "metrics_test": {
+      "n": 15078,
+      "prevalence": 0.11108900384666401,
+      "roc_auc": 0.6669776536997175,
+      "pr_auc": 0.22288202842857746,
+      "brier": 0.09422621130943298
+    },
+    "counts": {
+      "rows_total": 101766,
+      "rows_train": 71559,
+      "rows_val": 15129,
+      "rows_test": 15078
+    }
+  },
+  "filtered_cohort": {
+    "metrics_test": {
+      "n": 14722,
+      "prevalence": 0.1132318978399674,
+      "roc_auc": 0.6624138749423611,
+      "pr_auc": 0.22471924539393562,
+      "brier": 0.09591953456401825
+    },
+    "counts": {
+      "rows_total": 99353,
+      "rows_train": 69867,
+      "rows_val": 14764,
+      "rows_test": 14722
+    }
+  }
+}
