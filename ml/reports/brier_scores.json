@@ -1,0 +1,10 @@
+{
+  "test_brier_before": {
+    "logreg": 0.22317076459399823,
+    "xgboost": 0.09422621130943298
+  },
+  "test_brier_after_platt": {
+    "logreg": 0.09512690592875479,
+    "xgboost": 0.09423562141084178
+  }
+}
