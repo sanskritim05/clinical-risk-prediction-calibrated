@@ -18,6 +18,6 @@ This experiment refines the prediction population by excluding discharge disposi
 | Filtered cohort | 14722 | 0.113 | 0.662 | 0.225 | 0.096 |
 
 ## Notes
-Excluding structurally non-readmittable discharge categories (Expired, Hospice) produced only minor changes in discrimination and calibration metrics. This suggests that overall predictive performance was not solely driven by these categories.
+Excluding structurally non-readmittable discharge categories (Expired, Hospice) produced only minor changes in discriminatcleion and calibration metrics. This suggests that overall predictive performance was not solely driven by these categories.
 However, SHAP analysis demonstrated a substantial redistribution of feature importance after filtering. In the full cohort, “Expired” discharge disposition dominated global feature importance. After refinement, feature influence shifted toward prior utilization (e.g., number of inpatient visits), diagnosis groupings, and length of stay.
 This highlights the importance of carefully defining the eligible prediction population in clinical risk modeling, as cohort definition can meaningfully alter model interpretation even when overall performance remains similar.
