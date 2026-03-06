@@ -1,6 +1,8 @@
+# api/model_loader.py
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
@@ -10,6 +12,11 @@ import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS_DIR = PROJECT_ROOT / "ml" / "artifacts"
+ML_SRC_DIR = PROJECT_ROOT / "ml" / "src"
+
+# Make sure custom training modules like calibration.py are importable
+if str(ML_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(ML_SRC_DIR))
 
 
 def load_artifacts() -> Tuple[Any, Any, Dict[str, Any]]:
@@ -32,11 +39,6 @@ def load_artifacts() -> Tuple[Any, Any, Dict[str, Any]]:
 
 
 def features_to_frame(features: Dict[str, Any], meta: Dict[str, Any]) -> pd.DataFrame:
-    """
-    Convert incoming JSON features into a one-row dataframe matching training schema.
-    Missing features are filled with None so the pipeline imputers can handle them.
-    Extra features are ignored.
-    """
     cols = meta["feature_cols"]
     row = {col: features.get(col, None) for col in cols}
     return pd.DataFrame([row], columns=cols)

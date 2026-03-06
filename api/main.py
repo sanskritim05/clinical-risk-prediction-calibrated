@@ -2,14 +2,24 @@ from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException
 
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 from api.schemas import PredictRequest, PredictResponse
 from api.model_loader import load_artifacts, features_to_frame
-
 
 app = FastAPI(
     title="Clinical Risk Prediction API",
     version="0.1.0",
     description="Calibrated 30-day readmission risk prediction for a filtered clinical cohort."
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
