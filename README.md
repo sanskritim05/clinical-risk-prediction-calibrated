@@ -2,7 +2,7 @@
 
 An end-to-end machine learning project for predicting **30-day hospital readmission risk** using the **Diabetes 130-US Hospitals (1999-2008)** dataset.
 
-<video src="demo.mp4" controls width="800"></video>
+<video src="demo - clinical risk predictor.mp4" controls width="800"></video>
 
 This repository demonstrates the full lifecycle of a healthcare machine learning system:
 
