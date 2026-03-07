@@ -15,8 +15,8 @@ This repository demonstrates the full lifecycle of a healthcare machine learning
 - FastAPI deployment
 - interactive React dashboard
 
-⚠️ **Disclaimer:**  
-This project is for research and portfolio demonstration purposes only. It is **not intended for clinical use**.
+**Disclaimer:**  
+This project is for research and portfolio demonstration purposes only. It is not intended for clinical use.
 
 ---
 
@@ -108,8 +108,6 @@ The project was built in structured phases.
 - Perform **patient-level train/validation/test split**
 - Generate class balance and split reports
 
-Why this matters: multiple encounters exist per patient. Splitting by row would cause **data leakage**.
-
 ---
 
 ### Phase 2 - Feature Engineering
@@ -154,13 +152,13 @@ Evaluation metrics:
 | Logistic Regression | 0.661 | 0.205 |
 | XGBoost | 0.667 | 0.223 |
 
-PR-AUC is particularly important due to the **class imbalance**.
+PR-AUC is particularly important due to the class imbalance.
 
 ---
 
 ### Phase 4 - Probability Calibration
 
-Healthcare models require **well-calibrated probabilities**.
+Healthcare models require well-calibrated probabilities.
 
 Calibration was evaluated using:
 
@@ -175,7 +173,7 @@ Calibration was evaluated using:
 | XGBoost | 0.094 | 0.094 |
 
 XGBoost was already well-calibrated.  
-Logistic regression improved significantly after **Platt scaling**.
+Logistic regression improved significantly after Platt scaling.
 
 ---
 
@@ -214,8 +212,6 @@ Model performance was evaluated across demographic subgroups.
 
 Performance varied slightly across age groups but remained broadly consistent.
 
-These results represent **descriptive stratification**, not a fairness guarantee.
-
 ---
 
 ### Phase 7 - Cohort Refinement
@@ -226,7 +222,7 @@ Certain discharge outcomes make readmission impossible or clinically irrelevant:
 - Hospice / home
 - Hospice / medical facility
 
-These categories were removed to create a **refined prediction cohort**.
+These categories were removed to create a refined prediction cohort.
 
 Result:
 
@@ -425,7 +421,3 @@ This project demonstrates:
 - deployable ML systems
 
 These components are essential for trustworthy clinical ML applications.
-
-## License
-
-MIT License
