@@ -76,7 +76,6 @@ frontend/coverage/
 # ------------------------------
 # ML Data / Generated Artifacts
 # ------------------------------
-ml/data/raw/
 *.parquet
 *.feather
 *.h5
