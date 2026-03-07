@@ -85,7 +85,7 @@ clinical-risk-prediction-calibrated/
 ├── ml/
 │   ├── artifacts/            # exported models (local only)
 │   ├── data/
-│   │   ├── raw/              # raw dataset (not committed)
+│   │   ├── raw/              # raw dataset 
 │   │   └── processed/        # processed datasets
 │   ├── reports/              # evaluation outputs
 │   └── src/                  # training pipeline scripts
