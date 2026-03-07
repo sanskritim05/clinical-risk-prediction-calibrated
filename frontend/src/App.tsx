@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
@@ -39,6 +39,13 @@ type FormState = {
   diag_1_group: string;
   diag_2_group: string;
   diag_3_group: string;
+};
+
+type SavedResult = {
+  id: number;
+  savedAt: string;
+  form: FormState;
+  result: PredictResponse;
 };
 
 const API_BASE = "http://127.0.0.1:8000";
@@ -192,6 +199,14 @@ export default function App() {
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [savedResults, setSavedResults] = useState<SavedResult[]>(() => {
+    const stored = localStorage.getItem("savedClinicalRiskResults");
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("savedClinicalRiskResults", JSON.stringify(savedResults));
+  }, [savedResults]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -232,12 +247,46 @@ export default function App() {
     } catch (err: any) {
       setError(
         err?.response?.data?.detail ||
-          err?.message ||
-          "Prediction request failed."
+        err?.message ||
+        "Prediction request failed."
       );
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSaveResult = () => {
+    if (!result) return;
+
+    const newSavedResult: SavedResult = {
+      id: Date.now(),
+      savedAt: new Date().toLocaleString(),
+      form: { ...form },
+      result: { ...result },
+    };
+
+    setSavedResults((prev) => [newSavedResult, ...prev]);
+  };
+
+  const handleClearForm = () => {
+    setForm(initialForm);
+    setResult(null);
+    setError("");
+  };
+
+  const handleNewPrediction = () => {
+    setResult(null);
+    setError("");
+  };
+
+  const handleLoadSavedResult = (saved: SavedResult) => {
+    setForm(saved.form);
+    setResult(saved.result);
+    setError("");
+  };
+
+  const handleDeleteSavedResult = (id: number) => {
+    setSavedResults((prev) => prev.filter((item) => item.id !== id));
   };
 
   const probabilityPct = result
@@ -250,8 +299,8 @@ export default function App() {
     ? result.probability_readmit_lt30 < 0.1
       ? "Low"
       : result.probability_readmit_lt30 < 0.25
-      ? "Moderate"
-      : "High"
+        ? "Moderate"
+        : "High"
     : null;
 
   return (
@@ -523,59 +572,134 @@ export default function App() {
             {error && <p className="error">{error}</p>}
 
             {result && (
-              <div className="result-box">
-                <div className="result-pill">
-                  {result.served_model_name || result.model_name || "Unknown model"}
+              <>
+                <div className="result-box">
+                  <div className="result-pill">
+                    {result.served_model_name || result.model_name || "Unknown model"}
+                  </div>
+
+                  <div className="metric">
+                    <span className="metric-label">
+                      Predicted 30-day readmission risk
+                    </span>
+                    <span className="metric-value">{probabilityPct}%</span>
+                  </div>
+
+                  <div className="meter">
+                    <div
+                      className="meter-fill"
+                      style={{ width: `${riskValue}%` }}
+                    />
+                  </div>
+
+                  <div className="label-box">
+                    <span className="label-title">Risk interpretation</span>
+                    <span className="label-value">
+                      {riskBand} {riskBand === "Low" ? "risk" : "readmission risk"}
+                    </span>
+                    <p className="label-description">
+                      This value estimates the probability that the patient will be
+                      readmitted within 30 days of discharge.
+                    </p>
+                  </div>
+
+                  <div className="threshold-box">
+                    <span className="label-title">
+                      Label at threshold {result.threshold}
+                    </span>
+                    <span className="label-value">
+                      {result.predicted_label === 1 ? "High risk flag" : "Lower risk flag"}
+                    </span>
+                  </div>
+
+                  <div className="risk-guide">
+                    <h4>How to read this</h4>
+                    <ul>
+                      <li><strong>Below 10%</strong>: lower relative risk</li>
+                      <li><strong>10%–25%</strong>: moderate relative risk</li>
+                      <li><strong>Above 25%</strong>: higher relative risk</li>
+                    </ul>
+                  </div>
+
+                  <div className="note-box">
+                    Research demo only. This tool is not for clinical use.
+                  </div>
                 </div>
 
-                <div className="metric">
-                  <span className="metric-label">
-                    Predicted 30-day readmission risk
-                  </span>
-                  <span className="metric-value">{probabilityPct}%</span>
-                </div>
+                <div className="result-actions">
+                  <button
+                    className="submit-btn"
+                    type="button"
+                    onClick={handleSaveResult}
+                  >
+                    Save Result
+                  </button>
 
-                <div className="meter">
-                  <div
-                    className="meter-fill"
-                    style={{ width: `${riskValue}%` }}
-                  />
+                  <button
+                    className="submit-btn"
+                    type="button"
+                    onClick={handleClearForm}
+                  >
+                    Clear Form
+                  </button>
                 </div>
-
-                <div className="label-box">
-                  <span className="label-title">Risk interpretation</span>
-                  <span className="label-value">
-                    {riskBand} {riskBand === "Low" ? "risk" : "readmission risk"}
-                  </span>
-                  <p className="label-description">
-                    This value estimates the probability that the patient will be
-                    readmitted within 30 days of discharge.
-                  </p>
-                </div>
-
-                <div className="threshold-box">
-                  <span className="label-title">
-                    Label at threshold {result.threshold}
-                  </span>
-                  <span className="label-value">
-                    {result.predicted_label === 1 ? "High risk flag" : "Lower risk flag"}
-                  </span>
-                </div>
-
-                <div className="risk-guide">
-                  <h4>How to read this</h4>
-                  <ul>
-                    <li><strong>Below 10%</strong>: lower relative risk</li>
-                    <li><strong>10%–25%</strong>: moderate relative risk</li>
-                    <li><strong>Above 25%</strong>: higher relative risk</li>
-                  </ul>
-                </div>
-
-                <div className="note-box">
-                  Research demo only. This tool is not for clinical use.
-                </div>
-              </div>
+              </>
             )}
+
+            <div className="saved-results">
+              <h3>Saved Results</h3>
+
+              {savedResults.length === 0 ? (
+                <p className="muted">No saved predictions yet.</p>
+              ) : (
+                <div className="saved-results-list">
+                  {savedResults.map((item) => {
+                    const savedPct = (
+                      item.result.probability_readmit_lt30 * 100
+                    ).toFixed(1);
+
+                    const savedBand =
+                      item.result.probability_readmit_lt30 < 0.1
+                        ? "Low"
+                        : item.result.probability_readmit_lt30 < 0.25
+                          ? "Moderate"
+                          : "High";
+
+                    return (
+                      <div key={item.id} className="saved-result-item">
+                        <div>
+                          <strong>{savedPct}%</strong> readmission risk
+                          <div className="muted">
+                            {savedBand} risk · saved {item.savedAt}
+                          </div>
+                          <div className="muted">
+                            {item.form.age || "No age"} · {item.form.gender || "No gender"} ·{" "}
+                            {item.form.race || "No race"}
+                          </div>
+                        </div>
+
+                        <div className="saved-result-actions">
+                          <button
+                            type="button"
+                            className="submit-btn saved-action-btn"
+                            onClick={() => handleLoadSavedResult(item)}
+                          >
+                            Load
+                          </button>
+                          <button
+                            type="button"
+                            className="submit-btn saved-action-btn"
+                            onClick={() => handleDeleteSavedResult(item.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </aside>
         </main>
       </div>
