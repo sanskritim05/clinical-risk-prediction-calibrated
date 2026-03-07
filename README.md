@@ -4,7 +4,7 @@ An end-to-end machine learning project for predicting **30-day hospital readmiss
 
 ## Demo Video
 
-https://github.com/sanskritim05/clinical-risk-prediction-calibrated/blob/main/demo-clinical-risk-predictor.mp4
+https://github.com/user-attachments/assets/8b0f0697-fa35-40c5-ab48-ef74fe3e32e7
 
 This repository demonstrates the full lifecycle of a healthcare machine learning system:
 
