@@ -4,16 +4,16 @@ An end-to-end machine learning project for predicting **30-day hospital readmiss
 
 This repository demonstrates the full lifecycle of a healthcare machine learning system:
 
-- data preprocessing and leakage-safe splitting
-- feature engineering
-- model training and comparison
-- calibration analysis
+- Data preprocessing and leakage-safe splitting
+- Feature engineering
+- Model training and comparison
+- Calibration analysis
 - SHAP explainability
-- subgroup performance evaluation
-- cohort refinement experiments
-- model export
+- Subgroup performance evaluation
+- Cohort refinement experiments
+- Model export
 - FastAPI deployment
-- interactive React dashboard
+- Interactive React dashboard
 
 **Disclaimer:**  
 This project is for research and portfolio demonstration purposes only. It is not intended for clinical use.
@@ -28,11 +28,11 @@ This project builds a calibrated machine learning model that estimates the **pro
 
 The work goes beyond basic model training and focuses on:
 
-- realistic clinical evaluation
-- probability calibration
-- model interpretability
-- subgroup analysis
-- deployable ML systems
+- Realistic clinical evaluation
+- Probability calibration
+- Model interpretability
+- Subgroup analysis
+- Deployable ML systems
 
 ---
 
@@ -43,13 +43,13 @@ The work goes beyond basic model training and focuses on:
 
 The dataset contains **100,000+ hospital encounters** including:
 
-- demographics
-- lab procedures
-- medications
-- diagnoses
-- hospital admission information
-- discharge disposition
-- prior healthcare utilization
+- Demographics
+- Lab procedures
+- Medications
+- Diagnoses
+- Hospital admission information
+- Discharge disposition
+- Prior healthcare utilization
 
 ### Target Definition
 
@@ -114,20 +114,20 @@ The project was built in structured phases.
 
 Key transformations:
 
-- diagnosis codes mapped into **clinical groups**
+- Diagnosis codes mapped into **clinical groups**
 - ID fields mapped to readable labels using `IDS_mapping.csv`
-- numeric and categorical feature schema defined
+- Numeric and categorical feature schema defined
 
 Example diagnosis groups:
 
-- circulatory
-- respiratory
-- digestive
-- genitourinary
-- diabetes
-- neoplasms
-- injury / poisoning
-- other
+- Circulatory
+- Respiratory
+- Digestive
+- Genitourinary
+- Diabetes
+- Neoplasms
+- Injury / poisoning
+- Other
 
 ---
 
@@ -162,8 +162,8 @@ Healthcare models require well-calibrated probabilities.
 
 Calibration was evaluated using:
 
-- **Brier score**
-- calibration curves
+- Brier score
+- Calibration curves
 
 #### Brier Score (lower is better)
 
@@ -183,17 +183,17 @@ SHAP values were used to identify features influencing predictions.
 
 Important features included:
 
-- discharge disposition
-- prior inpatient visits
-- diagnosis group
-- number of lab procedures
-- hospital stay length
+- Discharge disposition
+- Prior inpatient visits
+- Diagnosis group
+- Number of lab procedures
+- Hospital stay length
 
 SHAP outputs generated:
 
-- global summary plot
-- top features JSON
-- example patient explanation
+- Global summary plot
+- Top features JSON
+- Example patient explanation
 
 ---
 
@@ -226,7 +226,7 @@ These categories were removed to create a refined prediction cohort.
 
 Result:
 
-- model interpretation improved
+- Model interpretation improved
 - SHAP importance became more clinically meaningful
 
 ---
@@ -235,9 +235,9 @@ Result:
 
 The final deployable model includes:
 
-- trained XGBoost pipeline
+- Trained XGBoost pipeline
 - Platt calibration model
-- metadata describing feature schema
+- Metadata describing feature schema
 
 Artifacts produced:
 
@@ -310,11 +310,11 @@ A React interface allows interactive predictions.
 
 Features:
 
-- patient encounter input form
-- example patient loader
-- calibrated probability display
-- risk interpretation guide
-- research disclaimer
+- Patient encounter input form
+- Example patient loader
+- Calibrated probability display
+- Risk interpretation guide
+- Research disclaimer
 
 Run the frontend:
 
@@ -392,21 +392,21 @@ npm run dev
 
 ## Limitations
 
-- dataset reflects older hospital practices
-- limited clinical variables compared to real EHR systems
-- not validated on external datasets
-- dashboard does not yet show per-patient SHAP explanations
+- Dataset reflects older hospital practices
+- Limited clinical variables compared to real EHR systems
+- Not validated on external datasets
+- Dashboard does not yet show per-patient SHAP explanations
 
 ## Future Improvements
 
 Potential next steps:
 
-- integrate SHAP explanations into frontend
-- add model monitoring
-- add model versioning
-- evaluate LightGBM / CatBoost
-- deploy using Docker
-- add external validation dataset
+- Integrate SHAP explanations into frontend
+- Add model monitoring
+- Add model versioning
+- Evaluate LightGBM / CatBoost
+- Deploy using Docker
+- Add external validation dataset
 
 ## Why This Project Matters
 
@@ -414,10 +414,10 @@ Healthcare machine learning systems must be evaluated beyond simple accuracy.
 
 This project demonstrates:
 
-- probability calibration
-- interpretability
-- cohort definition
-- subgroup performance
-- deployable ML systems
+- Probability calibration
+- Interpretability
+- Cohort definition
+- Subgroup performance
+- Deployable ML systems
 
 These components are essential for trustworthy clinical ML applications.
