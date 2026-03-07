@@ -2,6 +2,14 @@
 
 An end-to-end machine learning project for predicting **30-day hospital readmission risk** using the **Diabetes 130-US Hospitals (1999-2008)** dataset.
 
+---
+
+## Demo Video
+
+See the full system in action — from patient input to calibrated readmission risk prediction.
+
+**[Watch the demo](demo.mp4)**
+
 This repository demonstrates the full lifecycle of a healthcare machine learning system:
 
 - Data preprocessing and leakage-safe splitting
