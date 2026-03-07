@@ -73,14 +73,6 @@ frontend/.vite/
 frontend/coverage/
 *.tsbuildinfo
 
-# ------------------------------
-# ML Data / Generated Artifacts
-# ------------------------------
-*.parquet
-*.feather
-*.h5
-*.hdf5
-
 # model binaries
 ml/artifacts/*.joblib
 ml/artifacts/*.pkl
