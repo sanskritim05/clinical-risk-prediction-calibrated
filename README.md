@@ -1,45 +1,371 @@
-# Clinical Risk Prediction (Calibrated)
+# Clinical Risk Prediction with Calibration and Explainability
 
-End-to-end clinical readmission risk project with:
-- ML pipeline for training, calibration, explainability, and subgroup evaluation
-- FastAPI inference service for calibrated predictions
-- React + Vite frontend for interactive risk checks
+An end-to-end machine learning project for predicting **30-day hospital readmission risk** using the **Diabetes 130-US Hospitals (1999-2008)** dataset.
 
-## Repository Layout
+This repository demonstrates the full lifecycle of a healthcare machine learning system:
 
-- `ml/`
-- `ml/src/`: pipeline phases and training/evaluation code
-- `ml/data/`: raw and processed dataset files
-- `ml/reports/`: generated evaluation outputs and figures
-- `ml/artifacts/`: exported model pipeline + calibrator + metadata
-- `api/`: FastAPI app and model-loading utilities
-- `frontend/`: React TypeScript UI (Vite)
+- data preprocessing and leakage-safe splitting
+- feature engineering
+- model training and comparison
+- calibration analysis
+- SHAP explainability
+- subgroup performance evaluation
+- cohort refinement experiments
+- model export
+- FastAPI deployment
+- interactive React dashboard
 
-## Prerequisites
+⚠️ **Disclaimer:**  
+This project is for research and portfolio demonstration purposes only. It is **not intended for clinical use**.
 
-- Python 3.11+ (3.12 works)
-- Node.js 20+ and npm
+---
 
-## Python Setup (ML + API)
+## Project Overview
 
-From repo root:
+Hospital readmissions are costly and often preventable. Predicting which patients are likely to be readmitted within 30 days can help healthcare providers prioritize follow-up care and interventions.
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install pandas numpy scikit-learn xgboost shap matplotlib fastapi uvicorn pydantic joblib pyarrow
+This project builds a calibrated machine learning model that estimates the **probability of a patient being readmitted within 30 days of discharge**.
+
+The work goes beyond basic model training and focuses on:
+
+- realistic clinical evaluation
+- probability calibration
+- model interpretability
+- subgroup analysis
+- deployable ML systems
+
+---
+
+## Dataset
+
+**Dataset:** Diabetes 130-US Hospitals for Years 1999-2008  
+**Source:** UCI Machine Learning Repository
+
+The dataset contains **100,000+ hospital encounters** including:
+
+- demographics
+- lab procedures
+- medications
+- diagnoses
+- hospital admission information
+- discharge disposition
+- prior healthcare utilization
+
+### Target Definition
+
+The original dataset includes a `readmitted` column:
+
+| Value | Meaning |
+| --- | --- |
+| `NO` | No readmission |
+| `>30` | Readmitted after 30 days |
+| `<30` | Readmitted within 30 days |
+
+For this project:
+
+```text
+target_readmit_lt30 = 1 if readmitted == "<30"
+target_readmit_lt30 = 0 otherwise
 ```
 
-## Data Placement
+Positive class prevalence is approximately **11%**.
 
-Place required raw files in:
-- `ml/data/raw/diabetic_data.csv`
-- `ml/data/raw/IDS_mapping.csv`
+---
 
-## Run ML Pipeline
+## Project Structure
 
-From repo root:
+```text
+clinical-risk-prediction-calibrated/
+├── api/                      # FastAPI inference service
+│   ├── main.py
+│   ├── model_loader.py
+│   └── schemas.py
+├── frontend/                 # React dashboard
+│   └── src/
+├── ml/
+│   ├── artifacts/            # exported models (local only)
+│   ├── data/
+│   │   ├── raw/              # raw dataset (not committed)
+│   │   └── processed/        # processed datasets
+│   ├── reports/              # evaluation outputs
+│   └── src/                  # training pipeline scripts
+├── DATASET.md
+├── MODEL_CARD.md
+├── README.md
+└── .gitignore
+```
+
+---
+
+## Machine Learning Pipeline
+
+The project was built in structured phases.
+
+### Phase 1 - Data Loading and Splitting
+
+- Load UCI dataset
+- Create binary readmission target
+- Perform **patient-level train/validation/test split**
+- Generate class balance and split reports
+
+Why this matters: multiple encounters exist per patient. Splitting by row would cause **data leakage**.
+
+---
+
+### Phase 2 - Feature Engineering
+
+Key transformations:
+
+- diagnosis codes mapped into **clinical groups**
+- ID fields mapped to readable labels using `IDS_mapping.csv`
+- numeric and categorical feature schema defined
+
+Example diagnosis groups:
+
+- circulatory
+- respiratory
+- digestive
+- genitourinary
+- diabetes
+- neoplasms
+- injury / poisoning
+- other
+
+---
+
+### Phase 3 - Baseline Models
+
+Two models were trained:
+
+| Model | Purpose |
+| --- | --- |
+| Logistic Regression | Interpretable baseline |
+| XGBoost | Non-linear boosted tree model |
+
+Evaluation metrics:
+
+- ROC-AUC
+- PR-AUC
+
+#### Test Results
+
+| Model | ROC-AUC | PR-AUC |
+| --- | ---: | ---: |
+| Logistic Regression | 0.661 | 0.205 |
+| XGBoost | 0.667 | 0.223 |
+
+PR-AUC is particularly important due to the **class imbalance**.
+
+---
+
+### Phase 4 - Probability Calibration
+
+Healthcare models require **well-calibrated probabilities**.
+
+Calibration was evaluated using:
+
+- **Brier score**
+- calibration curves
+
+#### Brier Score (lower is better)
+
+| Model | Before | After |
+| --- | ---: | ---: |
+| Logistic Regression | 0.223 | 0.095 |
+| XGBoost | 0.094 | 0.094 |
+
+XGBoost was already well-calibrated.  
+Logistic regression improved significantly after **Platt scaling**.
+
+---
+
+### Phase 5 - SHAP Explainability
+
+SHAP values were used to identify features influencing predictions.
+
+Important features included:
+
+- discharge disposition
+- prior inpatient visits
+- diagnosis group
+- number of lab procedures
+- hospital stay length
+
+SHAP outputs generated:
+
+- global summary plot
+- top features JSON
+- example patient explanation
+
+---
+
+### Phase 6 - Subgroup Performance
+
+Model performance was evaluated across demographic subgroups.
+
+#### Gender
+
+| Group | ROC-AUC |
+| --- | ---: |
+| Female | 0.664 |
+| Male | 0.670 |
+
+#### Age Brackets
+
+Performance varied slightly across age groups but remained broadly consistent.
+
+These results represent **descriptive stratification**, not a fairness guarantee.
+
+---
+
+### Phase 7 - Cohort Refinement
+
+Certain discharge outcomes make readmission impossible or clinically irrelevant:
+
+- Expired
+- Hospice / home
+- Hospice / medical facility
+
+These categories were removed to create a **refined prediction cohort**.
+
+Result:
+
+- model interpretation improved
+- SHAP importance became more clinically meaningful
+
+---
+
+### Phase 8 - Model Export
+
+The final deployable model includes:
+
+- trained XGBoost pipeline
+- Platt calibration model
+- metadata describing feature schema
+
+Artifacts produced:
+
+```text
+ml/artifacts/
+  xgb_pipeline.joblib
+  platt_calibrator.joblib
+  model_meta.json
+```
+
+---
+
+## API Deployment
+
+A FastAPI service exposes the model.
+
+### Run the API
+
+```bash
+uvicorn api.main:app --reload
+```
+
+### Endpoints
+
+#### Health check
+
+`GET /health`
+
+Example response:
+
+```json
+{
+  "status": "ok",
+  "model": "xgboost_filtered_cohort"
+}
+```
+
+#### Prediction endpoint
+
+`POST /predict`
+
+Example request:
+
+```json
+{
+  "features": {
+    "time_in_hospital": 4,
+    "num_lab_procedures": 42,
+    "num_procedures": 1,
+    "num_medications": 12
+  }
+}
+```
+
+Example response:
+
+```json
+{
+  "probability_readmit_lt30": 0.157,
+  "predicted_label": 0,
+  "threshold": 0.5
+}
+```
+
+---
+
+## Frontend Dashboard
+
+A React interface allows interactive predictions.
+
+Features:
+
+- patient encounter input form
+- example patient loader
+- calibrated probability display
+- risk interpretation guide
+- research disclaimer
+
+Run the frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## How to Reproduce the Project
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sanskritim05/clinical-risk-prediction-calibrated.git
+cd clinical-risk-prediction-calibrated
+```
+
+### 2. Create Python environment
+
+```bash
+cd ml
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r ../requirements.txt
+```
+
+### 4. Add dataset files
+
+Place the following files locally:
+
+```text
+ml/data/raw/
+  diabetic_data.csv
+  IDS_mapping.csv
+```
+
+These files are excluded from version control.
+
+### 5. Run pipeline
 
 ```bash
 python ml/src/phase1_build.py
@@ -52,36 +378,13 @@ python ml/src/phase7_cohort_refinement.py
 python ml/src/phase8_train_export.py
 ```
 
-Expected export artifacts:
-- `ml/artifacts/xgb_pipeline.joblib`
-- `ml/artifacts/platt_calibrator.joblib`
-- `ml/artifacts/model_meta.json`
-
-## Run API
-
-From repo root:
+### 6. Run API
 
 ```bash
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn api.main:app --reload
 ```
 
-Health check:
-
-```bash
-curl http://127.0.0.1:8000/health
-```
-
-Prediction endpoint:
-
-```bash
-curl -X POST http://127.0.0.1:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"features": {}}'
-```
-
-Note: `features` keys should match `feature_cols` in `ml/artifacts/model_meta.json`.
-
-## Run Frontend
+### 7. Run frontend
 
 ```bash
 cd frontend
@@ -89,14 +392,40 @@ npm install
 npm run dev
 ```
 
-Frontend runs on `http://127.0.0.1:5173` (CORS is preconfigured in the API for local Vite hosts).
+---
 
-## Git Ignore Policy
+## Limitations
 
-Root `.gitignore` excludes:
-- Python caches, venvs, build outputs
-- Node modules and Vite build outputs
-- Environment files and local logs
-- Generated ML data directories and model binaries
+- dataset reflects older hospital practices
+- limited clinical variables compared to real EHR systems
+- not validated on external datasets
+- dashboard does not yet show per-patient SHAP explanations
 
-If you want to version specific generated outputs, remove or narrow those patterns.
+## Future Improvements
+
+Potential next steps:
+
+- integrate SHAP explanations into frontend
+- add model monitoring
+- add model versioning
+- evaluate LightGBM / CatBoost
+- deploy using Docker
+- add external validation dataset
+
+## Why This Project Matters
+
+Healthcare machine learning systems must be evaluated beyond simple accuracy.
+
+This project demonstrates:
+
+- probability calibration
+- interpretability
+- cohort definition
+- subgroup performance
+- deployable ML systems
+
+These components are essential for trustworthy clinical ML applications.
+
+## License
+
+MIT License
