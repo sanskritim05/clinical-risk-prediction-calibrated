@@ -30,6 +30,8 @@ This repository also includes the training pipeline, calibration workflow, SHAP 
 * [![FastAPI][FastAPI.tiangolo.com]][FastAPI-url]
 * [![React][React.dev]][React-url]
 * [![Vite][Vite.dev]][Vite-url]
+* [![Tailwind CSS][TailwindCSS.com]][TailwindCSS-url]
+* [![scikit-learn][ScikitLearn.org]][ScikitLearn-url]
 * [![XGBoost][XGBoost]][XGBoost-url]
 * [![SHAP][SHAP]][SHAP-url]
 
@@ -181,10 +183,20 @@ This project is for research, portfolio, and demonstration purposes only. It is 
 [Python-url]: https://python.org
 [FastAPI.tiangolo.com]: https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white
 [FastAPI-url]: https://fastapi.tiangolo.com
+[typescriptlang.org]: https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org
 [React.dev]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [React-url]: https://react.dev
 [Vite.dev]: https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white
 [Vite-url]: https://vite.dev
+[TailwindCSS.com]: https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white
+[TailwindCSS-url]: https://tailwindcss.com
+[Recharts.org]: https://img.shields.io/badge/Recharts-FF6B6B?style=for-the-badge&logoColor=white
+[Recharts-url]: https://recharts.org
+[Pandas.pydata.org]: https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white
+[Pandas-url]: https://pandas.pydata.org
+[ScikitLearn.org]: https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white
+[ScikitLearn-url]: https://scikit-learn.org
 [XGBoost]: https://img.shields.io/badge/XGBoost-EC6B23?style=for-the-badge&logoColor=white
 [XGBoost-url]: https://xgboost.readthedocs.io
 [SHAP]: https://img.shields.io/badge/SHAP-2E8B57?style=for-the-badge&logoColor=white
