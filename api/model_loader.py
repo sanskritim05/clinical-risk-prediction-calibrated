@@ -19,6 +19,11 @@ if str(ML_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(ML_SRC_DIR))
 
 
+PIPE = None
+CAL = None
+META = None
+
+
 def load_artifacts() -> Tuple[Any, Any, Dict[str, Any]]:
     model_path = ARTIFACTS_DIR / "xgb_pipeline.joblib"
     cal_path = ARTIFACTS_DIR / "platt_calibrator.joblib"
@@ -42,3 +47,9 @@ def features_to_frame(features: Dict[str, Any], meta: Dict[str, Any]) -> pd.Data
     cols = meta["feature_cols"]
     row = {col: features.get(col, None) for col in cols}
     return pd.DataFrame([row], columns=cols)
+
+
+try:
+    PIPE, CAL, META = load_artifacts()
+except Exception:
+    PIPE, CAL, META = None, None, None

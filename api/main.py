@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException
-
-from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.schemas import PredictRequest, PredictResponse
-from api.model_loader import load_artifacts, features_to_frame
+from api.schemas import (
+    ComparePatientsRequest,
+    ComparedPatientResponse,
+    ExplainPatientResponse,
+    PatientIdRequest,
+    PatientListItem,
+    PatientPredictionResponse,
+    PredictRequest,
+    PredictResponse,
+)
+from api.model_loader import CAL, META, PIPE, features_to_frame
+from api.patient_service import compare_patients, explain_patient, get_patient_list, predict_patient
 
 app = FastAPI(
     title="Clinical Risk Prediction API",
@@ -23,12 +31,28 @@ app.add_middleware(
 )
 
 
-try:
-    PIPE, CAL, META = load_artifacts()
-    LOAD_ERROR = None
-except Exception as e:
-    PIPE, CAL, META = None, None, None
-    LOAD_ERROR = str(e)
+LOAD_ERROR = None if all(item is not None for item in (PIPE, CAL, META)) else (
+    "Model artifacts could not be loaded. Run Phase 8 export to create ml/artifacts."
+)
+
+
+@app.get("/")
+def root():
+    return {
+        "name": "Clinical Risk Prediction API",
+        "status": "ok" if LOAD_ERROR is None else "error",
+        "model": META.get("model_name") if META else None,
+        "detail": LOAD_ERROR or "API is running.",
+        "docs": "/docs",
+        "health": "/health",
+        "available_endpoints": [
+            "/get_patient_list?limit=50",
+            "/predict",
+            "/predict_patient",
+            "/explain_patient",
+            "/compare_patients",
+        ],
+    }
 
 
 @app.get("/health")
@@ -71,3 +95,53 @@ def predict(req: PredictRequest):
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Prediction failed: {e}")
+
+
+@app.get("/get_patient_list", response_model=list[PatientListItem])
+def patient_list(limit: int = 50):
+    if LOAD_ERROR:
+        raise HTTPException(status_code=500, detail=LOAD_ERROR)
+
+    try:
+        return get_patient_list(limit=limit)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Could not load patient list: {e}")
+
+
+@app.post("/predict_patient", response_model=PatientPredictionResponse)
+def predict_patient_endpoint(req: PatientIdRequest):
+    if LOAD_ERROR:
+        raise HTTPException(status_code=500, detail=LOAD_ERROR)
+
+    try:
+        return predict_patient(req.patient_id)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Prediction failed: {e}")
+
+
+@app.post("/explain_patient", response_model=ExplainPatientResponse)
+def explain_patient_endpoint(req: PatientIdRequest):
+    if LOAD_ERROR:
+        raise HTTPException(status_code=500, detail=LOAD_ERROR)
+
+    try:
+        return explain_patient(req.patient_id)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Explanation failed: {e}")
+
+
+@app.post("/compare_patients", response_model=list[ComparedPatientResponse])
+def compare_patients_endpoint(req: ComparePatientsRequest):
+    if LOAD_ERROR:
+        raise HTTPException(status_code=500, detail=LOAD_ERROR)
+
+    try:
+        return compare_patients(req.patient_ids)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Comparison failed: {e}")
