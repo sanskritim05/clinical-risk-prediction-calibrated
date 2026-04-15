@@ -26,7 +26,7 @@ This repository also includes the training pipeline, calibration workflow, SHAP 
 ### Built With
 
 * [![Python][Python.org]][Python-url]
-* [![TypeScript][TypeScript.org]][TypeScript-url]
+* [![TypeScript][typescriptlang.org]][TypeScript-url]
 * [![FastAPI][FastAPI.tiangolo.com]][FastAPI-url]
 * [![React][React.dev]][React-url]
 * [![Vite][Vite.dev]][Vite-url]
