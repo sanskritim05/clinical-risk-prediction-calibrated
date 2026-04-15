@@ -1,3 +1,16 @@
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <h3 align="center">Clinical Risk Prediction Calibrated</h3>
+
+  <p align="center">
+    A healthcare ML system that predicts diabetes readmission risk using a trained model, serves predictions via FastAPI, and displays results in a React dashboard for patient review and manual entry.
+  </p>
+</div>
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
 Clinical Risk Prediction Dashboard is an end-to-end healthcare machine learning project built around the Diabetes 130-US Hospitals (1999-2008) dataset. It trains a calibrated readmission risk model, serves predictions through FastAPI, and presents results in a React dashboard with both patient-directory review and manual case entry.
 
 Users can:
