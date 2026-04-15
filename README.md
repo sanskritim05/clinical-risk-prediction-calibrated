@@ -4,7 +4,7 @@
   <h3 align="center">Clinical Risk Prediction Calibrated</h3>
 
   <p align="center">
-    A healthcare ML system that predicts diabetes readmission risk using a trained model, serves predictions via FastAPI, and displays results in a React dashboard for patient review and manual entry.
+    A healthcare ML system that predicts diabetes readmission risk.
   </p>
 </div>
 
