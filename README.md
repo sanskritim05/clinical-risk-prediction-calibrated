@@ -93,25 +93,24 @@ This repository also includes the training pipeline, calibration workflow, SHAP 
 
 ### Run Locally
 
-1. Start the API
-   ```sh
-   cd ml
-   source .venv/bin/activate
-   uvicorn api.main:app --reload
-   ```
-2. Start the frontend
-   ```sh
-   cd frontend
-   npm run dev
-   ```
-3. Open the app in your browser
-   ```text
-   http://localhost:5173
-   ```
-4. Optional backend docs
-   ```text
-   http://127.0.0.1:8000/docs
-   ```
+The dashboard is self-contained (in-browser demo scorer). You do not need the API to use the UI.
+
+```sh
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+Optional: run the original FastAPI model locally with `uvicorn api.main:app --reload` after generating artifacts. The hosted Vercel app does not use this API.
+
+### Deploy on Vercel
+
+1. Push the repo to GitHub.
+2. Import it at [vercel.com/new](https://vercel.com/new).
+3. Vercel uses the root `vercel.json` (build `frontend`, output `frontend/dist`).
+4. Deploy. No environment variables are required.
 
 <!-- USAGE -->
 ## Usage
@@ -124,13 +123,13 @@ This repository also includes the training pipeline, calibration workflow, SHAP 
 
 ## Features
 
-* FastAPI backend with health, prediction, explanation, and comparison endpoints
-* Patient-directory workflow backed by processed cohort data
+* Self-contained dashboard that deploys on Vercel (no Python host required)
+* Patient-directory workflow with a demo cohort
 * Manual assessment workflow for direct feature entry
-* Calibrated XGBoost readmission risk model
-* SHAP-based patient-level explainability
+* In-browser calibrated surrogate scorer (demo stand-in for the trained XGBoost artifact)
+* Patient-level feature-impact charts
 * Side-by-side patient comparison view
-* Reproducible ML pipeline covering preprocessing, training, calibration, and evaluation
+* Optional FastAPI + reproducible ML pipeline for local training and the original model
 
 ## API Endpoints
 
@@ -156,10 +155,10 @@ clinical-risk-prediction-calibrated/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   ├── api.ts
+│   │   ├── lib/
 │   │   ├── App.tsx
 │   │   ├── index.css
-│   │   └── types.ts
+│   │   └── main.tsx
 │   ├── .env.example
 │   ├── package.json
 │   └── vite.config.ts

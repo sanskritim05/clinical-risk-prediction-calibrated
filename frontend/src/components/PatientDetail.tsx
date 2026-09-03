@@ -1,120 +1,132 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Activity, AlertTriangle, ArrowLeft, ShieldCheck, Siren } from "lucide-react";
 
-import { explainPatient, predictPatient } from "../api";
-import type { PatientExplanation, PatientListItem, PatientPrediction } from "../types";
-import { PredictionGauge } from "./PredictionGauge";
-import { SHAPWaterfall } from "./SHAPWaterfall";
+import { explainPatient, predictPatient } from "@/lib/api";
+import {
+  CLINICAL_THRESHOLD,
+  prettyAge,
+  prettyOption,
+  type DirectoryPatient,
+} from "@/lib/risk-types";
+import { RiskGauge } from "@/components/RiskGauge";
+import { ShapChart } from "@/components/ShapChart";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-type PatientDetailProps = {
-  patient: PatientListItem | null;
-};
+function SummaryCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="panel-flat p-3.5">
+      <p className="label-micro">{label}</p>
+      <p className="mt-1.5 text-sm font-semibold leading-snug">{value}</p>
+    </div>
+  );
+}
 
-export function PatientDetail({ patient }: PatientDetailProps) {
-  const [prediction, setPrediction] = useState<PatientPrediction | null>(null);
-  const [explanation, setExplanation] = useState<PatientExplanation | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+export function PatientDetail({
+  patient,
+  onBack,
+}: {
+  patient: DirectoryPatient | null;
+  onBack: () => void;
+}) {
+  const id = patient?.patient_id;
 
-  useEffect(() => {
-    if (!patient) {
-      return;
-    }
-
-    const patientId = patient.patient_nbr;
-    let cancelled = false;
-
-    async function loadPatientDetail() {
-      setLoading(true);
-      setError("");
-
-      try {
-        const [predictionResponse, explanationResponse] = await Promise.all([
-          predictPatient(patientId),
-          explainPatient(patientId),
-        ]);
-
-        if (!cancelled) {
-          setPrediction(predictionResponse);
-          setExplanation(explanationResponse);
-        }
-      } catch (detailError) {
-        if (!cancelled) {
-          setError(
-            detailError instanceof Error
-              ? detailError.message
-              : "Unable to load patient detail."
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    void loadPatientDetail();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [patient]);
+  const prediction = useQuery({
+    queryKey: ["predict", id],
+    queryFn: () => predictPatient(id!),
+    enabled: !!id,
+  });
+  const explanation = useQuery({
+    queryKey: ["explain", id],
+    queryFn: () => explainPatient(id!),
+    enabled: !!id,
+  });
 
   if (!patient) {
     return (
-      <div className="rounded-3xl border border-dashed border-slate-700 bg-slate-900/50 p-10 text-slate-300">
-        Select a patient to review their prediction and SHAP explanation.
+      <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border p-12 text-center">
+        <Activity className="h-5 w-5 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">
+          Select a patient from the directory to view their risk profile.
+        </p>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <section className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-2xl shadow-slate-950/40">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Patient Detail
-            </p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
-              Patient #{patient.patient_nbr}
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm text-slate-400">
-              {(patient.race || "Unknown").toLowerCase()} race cohort •{" "}
-              {(patient.gender || "Unknown").toLowerCase()} • {patient.age || "Unknown age"} •
-              admission type: {patient.admission_type_id || "Unknown"}
-            </p>
-          </div>
-          <div className="grid gap-3 text-sm text-slate-300 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3">
-              Stay length: {patient.time_in_hospital} days
-            </div>
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3">
-              Prior inpatient visits: {patient.number_inpatient}
-            </div>
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3">
-              Emergency visits: {patient.number_emergency}
-            </div>
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3">
-              Disposition: {patient.discharge_disposition_id}
-            </div>
-          </div>
-        </div>
-      </section>
+  const high = (prediction.data?.probability ?? 0) >= CLINICAL_THRESHOLD;
 
-      {loading ? (
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-8 text-slate-300">
-          Loading prediction and explanation...
+  return (
+    <section className="space-y-4 overflow-auto scroll-clinical pb-6">
+      <header className="border-b border-border pb-4">
+        <Button variant="ghost" size="sm" className="-ml-2 mb-2 h-7 rounded-sm px-2 text-xs" onClick={onBack}>
+          <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Directory
+        </Button>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="label-micro">Encounter</p>
+            <h1 className="mt-1 font-mono text-2xl font-semibold tracking-tight">
+              {patient.patient_id}
+            </h1>
+          </div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+            {prettyOption(patient.race)} / {patient.gender} / {prettyAge(patient.age)} yrs /{" "}
+            {patient.admission_type}
+          </p>
         </div>
-      ) : error ? (
-        <div className="rounded-3xl border border-rose-500/30 bg-rose-500/10 p-6 text-rose-100">
-          {error}
+      </header>
+
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <SummaryCard label="Stay length" value={`${patient.time_in_hospital} days`} />
+        <SummaryCard label="Prior inpatient" value={`${patient.number_inpatient} visits`} />
+        <SummaryCard label="Emergency visits" value={`${patient.number_emergency}`} />
+        <SummaryCard label="Discharge" value={patient.discharge_disposition} />
+      </div>
+
+      {prediction.isError ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          Prediction service failed.
+          <Button variant="secondary" size="sm" className="rounded-sm" onClick={() => prediction.refetch()}>
+            Retry
+          </Button>
         </div>
-      ) : prediction && explanation ? (
-        <div className="grid gap-6 xl:grid-cols-[360px,minmax(0,1fr)]">
-          <PredictionGauge prediction={prediction} />
-          <SHAPWaterfall explanation={explanation} title="Patient-level Feature Impact" />
+      ) : prediction.isPending || !prediction.data ? (
+        <div className="h-48 animate-pulse rounded-lg bg-muted/50" />
+      ) : (
+        <div className="space-y-2">
+          <RiskGauge prediction={prediction.data} />
+          <div
+            className={cn(
+              "flex items-center gap-2.5 panel-flat p-3.5 text-sm",
+              high ? "border-risk-high/35" : "border-risk-low/35",
+            )}
+          >
+            {high ? (
+              <Siren className="h-4 w-4 text-risk-high" />
+            ) : (
+              <ShieldCheck className="h-4 w-4 text-risk-low" />
+            )}
+            <span className="label-micro">Suggested action</span>
+            <span className="font-medium">
+              {high ? "Escalate for review" : "Monitor with routine follow-up"}
+            </span>
+          </div>
         </div>
-      ) : null}
-    </div>
+      )}
+
+      {explanation.isError ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          Explainability service failed.
+          <Button variant="secondary" size="sm" className="rounded-sm" onClick={() => explanation.refetch()}>
+            Retry
+          </Button>
+        </div>
+      ) : explanation.isPending || !explanation.data ? (
+        <div className="h-64 animate-pulse rounded-lg bg-muted/50" />
+      ) : (
+        <ShapChart drivers={explanation.data.drivers} />
+      )}
+    </section>
   );
 }

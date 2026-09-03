@@ -1,270 +1,248 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState, type ReactNode } from "react";
+import { Activity, GitCompare, HeartPulse, Table2, UserRound, X } from "lucide-react";
 
-import { getPatientList } from "./api";
-import { ComparisonView } from "./components/ComparisonView";
-import { ManualAssessment } from "./components/ManualAssessment";
-import { PatientDetail } from "./components/PatientDetail";
-import { PatientList } from "./components/PatientList";
-import type { PatientListItem } from "./types";
+import { PatientDirectory } from "@/components/PatientDirectory";
+import { usePatients } from "@/hooks/usePatients";
+import { PatientDetail } from "@/components/PatientDetail";
+import { ComparisonView } from "@/components/ComparisonView";
+import { ManualAssessment } from "@/components/ManualAssessment";
+import { MODEL_NAME, type DirectoryPatient } from "@/lib/risk-types";
+import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+
+type Mode = "directory" | "manual";
+type View = "directory" | "detail" | "compare" | "manual";
+
+function StatusBlock({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="border-t border-sidebar-border px-5 py-4">
+      <p className="label-micro">{label}</p>
+      <div className="mt-1.5">{children}</div>
+    </div>
+  );
+}
 
 export default function App() {
-  const [patients, setPatients] = useState<PatientListItem[]>([]);
-  const [directoryQuery, setDirectoryQuery] = useState("");
-  const [activePatientId, setActivePatientId] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [workspaceMode, setWorkspaceMode] = useState<"directory" | "manual">("directory");
+  const { data: patients = [], isPending, isError, refetch, isRefetching } = usePatients();
+  const [mode, setMode] = useState<Mode>("directory");
   const [compareMode, setCompareMode] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [view, setView] = useState<View>("directory");
 
-  const loadPatients = async () => {
-    setLoading(true);
-    setError("");
+  const resolvedFocusedId = focusedId ?? patients[0]?.patient_id ?? null;
+  const focused = patients.find((p) => p.patient_id === resolvedFocusedId) ?? null;
 
-    try {
-      const response = await getPatientList(60);
-      setPatients(response);
-      setActivePatientId((currentId) => {
-        if (currentId && response.some((patient) => patient.patient_nbr === currentId)) {
-          return currentId;
-        }
-        return response[0]?.patient_nbr || null;
-      });
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Unable to load patient directory."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadPatients();
-  }, []);
-
-  const filteredPatients = useMemo(() => {
-    const query = directoryQuery.trim().toLowerCase();
-    if (!query) {
-      return patients;
-    }
-
-    return patients.filter((patient) =>
-      [
-        patient.patient_nbr,
-        patient.race || "Unknown",
-        patient.gender || "Unknown",
-        patient.age || "Unknown",
-        patient.admission_type_id || "Unknown",
-      ].some((value) => value.toLowerCase().includes(query))
-    );
-  }, [directoryQuery, patients]);
-
-  const activePatient =
-    patients.find((patient) => patient.patient_nbr === activePatientId) || null;
-
-  const handlePatientClick = (patientId: string) => {
+  function handleSelect(patient: DirectoryPatient) {
     if (compareMode) {
-      setSelectedIds((currentIds) =>
-        currentIds.includes(patientId)
-          ? currentIds.filter((id) => id !== patientId)
-          : [...currentIds, patientId]
+      setSelectedIds((prev) =>
+        prev.includes(patient.patient_id)
+          ? prev.filter((id) => id !== patient.patient_id)
+          : [...prev, patient.patient_id],
       );
       return;
     }
+    setFocusedId(patient.patient_id);
+    setView("detail");
+  }
 
-    setActivePatientId(patientId);
-  };
+  function toggleCompare(next: boolean) {
+    setCompareMode(next);
+    if (!next) {
+      setSelectedIds([]);
+      setView("directory");
+    }
+  }
 
-  const handleCompareToggle = () => {
-    setCompareMode((current) => {
-      const next = !current;
-      if (!next) {
-        setSelectedIds([]);
-      }
-      return next;
-    });
-  };
+  const activeView: View =
+    mode === "manual"
+      ? "manual"
+      : compareMode
+        ? "compare"
+        : view === "detail"
+          ? "detail"
+          : "directory";
+
+  const navLabel =
+    activeView === "manual"
+      ? "Manual entry"
+      : activeView === "compare"
+        ? "Comparison"
+        : activeView === "detail"
+          ? "Single-patient detail"
+          : "Patient directory";
+
+  const navItems = [
+    { id: "directory", label: "Patient directory", icon: Table2 },
+    { id: "manual", label: "Manual assessment", icon: Activity },
+  ] as const;
+
+  const directory = (
+    <PatientDirectory
+      patients={patients}
+      isLoading={isPending}
+      isError={isError}
+      onRetry={() => refetch()}
+      isRefetching={isRefetching}
+      focusedId={resolvedFocusedId}
+      selectedIds={selectedIds}
+      compareMode={compareMode}
+      onSelect={handleSelect}
+    />
+  );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto flex min-h-screen max-w-[1700px] gap-6 px-4 py-5 lg:px-6">
-        <aside className="w-full max-w-[380px] flex-col gap-6 lg:flex">
-          <section className="rounded-[2rem] border border-slate-800 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_38%),linear-gradient(180deg,rgba(15,23,42,0.95),rgba(2,6,23,0.95))] p-6 shadow-2xl shadow-slate-950/40">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-300">
-              Clinical Risk Dashboard
+    <div className="flex min-h-screen bg-background text-foreground">
+      <aside className="hidden w-[17.5rem] shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+        <div className="flex items-center gap-2.5 px-5 py-5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-sm border border-primary/30 bg-primary/12 text-primary">
+            <HeartPulse className="h-4.5 w-4.5" />
+          </span>
+          <div>
+            <p className="font-display text-sm font-semibold tracking-tight">READMIT CONSOLE</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              30-day diabetes risk
             </p>
-            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-              Patient review dashboard
-            </h1>
-            <p className="mt-4 text-sm leading-6 text-slate-300">
-              Review patient risk, see the strongest contributing factors, and
-              compare cases side by side in one place.
-            </p>
+          </div>
+        </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500">
-                  Navigation
-                </p>
-                <p className="mt-2 text-sm text-slate-300">
-                  {workspaceMode === "manual"
-                    ? "Manual case entry"
-                    : compareMode
-                      ? "Comparison mode enabled"
-                      : "Single-patient detail mode"}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500">
-                  Selection
-                </p>
-                <p className="mt-2 text-sm text-slate-300">
-                  {workspaceMode === "manual"
-                    ? "Currently open: manual patient entry"
-                    : compareMode
-                    ? `${selectedIds.length} patient${selectedIds.length === 1 ? "" : "s"} selected`
-                    : activePatientId
-                      ? `Focused on patient #${activePatientId}`
-                      : "Waiting for a patient selection"}
-                </p>
-              </div>
-            </div>
-          </section>
+        <div className="mx-5 mb-4 rounded-sm border-l-2 border-risk-high/70 bg-risk-high/5 px-3 py-2">
+          <p className="font-mono text-[10px] leading-relaxed uppercase tracking-[0.1em] text-muted-foreground">
+            Research / demo only — on-device scorer, not for clinical use
+          </p>
+        </div>
 
-          <section className="rounded-[2rem] border border-slate-800 bg-slate-900/80 p-5 shadow-2xl shadow-slate-950/40">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Workspace
-            </p>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setWorkspaceMode("directory")}
-                className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
-                  workspaceMode === "directory"
-                    ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-100"
-                    : "border-slate-700 bg-slate-950 text-slate-300"
-                }`}
-              >
-                Patient directory
-              </button>
-              <button
-                type="button"
-                onClick={() => setWorkspaceMode("manual")}
-                className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
-                  workspaceMode === "manual"
-                    ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-100"
-                    : "border-slate-700 bg-slate-950 text-slate-300"
-                }`}
-              >
-                Manual assessment
-              </button>
-            </div>
-            <p className="mt-4 text-sm leading-6 text-slate-300">
-              Switch between saved cohort patients and a blank form for manual case entry.
-            </p>
-          </section>
+        <nav className="px-3 pb-4">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setMode(item.id);
+                if (item.id === "directory") setView("directory");
+              }}
+              className={cn(
+                "flex w-full items-center gap-2.5 rounded-sm px-3 py-2 text-left text-sm transition-colors",
+                mode === item.id
+                  ? "bg-primary/12 text-primary shadow-[inset_2px_0_0_0_var(--color-primary)]"
+                  : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </button>
+          ))}
+        </nav>
 
-          {workspaceMode === "directory" ? (
-            <section className="rounded-[2rem] border border-slate-800 bg-slate-900/80 p-5 shadow-2xl shadow-slate-950/40">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                    Workflow
-                  </p>
-                  <h2 className="mt-2 text-lg font-semibold text-white">
-                    Multi-select for comparison
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCompareToggle}
-                  className={`relative inline-flex h-10 w-20 items-center rounded-full border transition ${
-                    compareMode
-                      ? "border-cyan-400/40 bg-cyan-500/20"
-                      : "border-slate-700 bg-slate-950"
-                  }`}
-                >
-                  <span
-                    className={`inline-flex h-8 w-8 transform items-center justify-center rounded-full bg-white text-[10px] font-semibold text-slate-950 shadow-lg transition ${
-                      compareMode ? "translate-x-10" : "translate-x-1"
-                    }`}
-                  >
-                    {compareMode ? "ON" : "OFF"}
-                  </span>
-                </button>
-              </div>
+        <StatusBlock label="Navigation">
+          <p className="text-sm font-medium">{navLabel}</p>
+        </StatusBlock>
 
-              <p className="mt-4 text-sm leading-6 text-slate-300">
-                With Compare off, clicking a patient opens their detail view. With
-                Compare on, each click adds or removes that patient from the review set.
-              </p>
+        <StatusBlock label="Mode">
+          <div className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-2 text-sm">
+              <GitCompare className="h-3.5 w-3.5 text-muted-foreground" /> Compare
+            </span>
+            <Switch checked={compareMode} onCheckedChange={toggleCompare} />
+          </div>
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+            {compareMode
+              ? "Clicking a patient adds them to the comparison set."
+              : "Clicking a patient opens their detail view."}
+          </p>
+        </StatusBlock>
 
-              {selectedIds.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
+        <StatusBlock label="Selection">
+          {compareMode ? (
+            selectedIds.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No patients selected</p>
+            ) : (
+              <>
+                <p className="text-sm font-medium">{selectedIds.length} selected</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
                   {selectedIds.map((id) => (
-                    <span
+                    <button
                       key={id}
-                      className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100"
+                      onClick={() =>
+                        setSelectedIds((prev) => prev.filter((existing) => existing !== id))
+                      }
+                      className="flex items-center gap-1 rounded-sm border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] text-primary transition-colors hover:bg-primary/20"
                     >
-                      #{id}
-                    </span>
+                      {id.slice(-4)} <X className="h-3 w-3" />
+                    </button>
                   ))}
                 </div>
-              ) : null}
-            </section>
-          ) : null}
-
-          {workspaceMode === "directory" ? (
-            loading ? (
-              <div className="rounded-[2rem] border border-slate-800 bg-slate-900/80 p-6 text-slate-300">
-                Loading cohort directory...
-              </div>
-            ) : error ? (
-              <div className="rounded-[2rem] border border-rose-500/30 bg-rose-500/10 p-6 text-rose-100">
-                <p className="font-semibold">Patient directory unavailable</p>
-                <p className="mt-2 text-sm leading-6">{error}</p>
-                <div className="mt-4 rounded-2xl border border-rose-400/20 bg-slate-950/30 px-4 py-4 text-sm text-rose-50">
-                  Start the API in another terminal with `uvicorn api.main:app --reload`, then retry.
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void loadPatients();
-                  }}
-                  className="mt-4 rounded-2xl border border-rose-300/30 bg-rose-400/10 px-4 py-3 text-sm font-medium text-rose-50 transition hover:bg-rose-400/20"
-                >
-                  Retry patient load
-                </button>
-              </div>
-            ) : (
-              <PatientList
-                patients={filteredPatients}
-                selectedIds={selectedIds}
-                activePatientId={activePatientId}
-                compareMode={compareMode}
-                searchQuery={directoryQuery}
-                onPatientClick={handlePatientClick}
-                onSearchChange={setDirectoryQuery}
-                onRefresh={() => {
-                  void loadPatients();
-                }}
-              />
+              </>
             )
-          ) : null}
-        </aside>
-
-        <main className="min-w-0 flex-1 py-1">
-          {workspaceMode === "manual" ? (
-            <ManualAssessment />
-          ) : compareMode && selectedIds.length >= 2 ? (
-            <ComparisonView patientIds={selectedIds} />
           ) : (
-            <PatientDetail patient={activePatient} />
+            <p className="flex items-center gap-1.5 font-mono text-sm">
+              <UserRound className="h-3.5 w-3.5 text-muted-foreground" />
+              {focused ? focused.patient_id : "None"}
+            </p>
+          )}
+        </StatusBlock>
+
+        <div className="mt-auto border-t border-sidebar-border px-5 py-3">
+          <p className="font-mono text-[10px] text-muted-foreground">model: {MODEL_NAME}</p>
+        </div>
+      </aside>
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
+          <span className="flex h-8 w-8 items-center justify-center rounded-sm border border-primary/30 bg-primary/12 text-primary">
+            <HeartPulse className="h-4 w-4" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-xs font-semibold tracking-tight">READMIT CONSOLE</p>
+            <p className="truncate font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              {navLabel}
+              {compareMode ? ` · ${selectedIds.length} selected` : focused ? ` · ${focused.patient_id}` : ""}
+            </p>
+          </div>
+          <label className="flex items-center gap-2">
+            <span className="label-micro">Cmp</span>
+            <Switch checked={compareMode} onCheckedChange={toggleCompare} />
+          </label>
+        </header>
+
+        <main className="flex min-h-0 flex-1 flex-col p-4 pb-20 sm:p-6 lg:p-8 lg:pb-8">
+          {activeView === "manual" ? (
+            <ManualAssessment />
+          ) : activeView === "compare" ? (
+            <div className="grid min-h-0 flex-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="min-h-0">{directory}</div>
+              <ComparisonView patientIds={selectedIds} patients={patients} />
+            </div>
+          ) : activeView === "detail" ? (
+            <PatientDetail patient={focused} onBack={() => setView("directory")} />
+          ) : (
+            directory
           )}
         </main>
+
+        <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-2 border-t border-border bg-sidebar/95 backdrop-blur lg:hidden">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setMode(item.id);
+                if (item.id === "directory") setView("directory");
+              }}
+              className={cn(
+                "flex flex-col items-center gap-1 py-2.5 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors",
+                mode === item.id ? "text-primary" : "text-muted-foreground",
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.id === "directory" ? "Directory" : "Manual"}
+            </button>
+          ))}
+        </nav>
       </div>
     </div>
   );
