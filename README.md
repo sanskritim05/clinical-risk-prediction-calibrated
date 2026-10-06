@@ -157,13 +157,12 @@ clinical-risk-prediction-calibrated/
 └── requirements.txt
 ```
 ## Model Performance
+Evaluated on a held-out test set of 15,078 encounters (70% train / 15% validation / 15% test, split by patient ID). The 30-day readmission rate in the cohort is 11.16%.
 
-Evaluated on a held-out test set of [N] encounters ([X]% train / [X]% validation / [X]% test, split by [patient ID / random]). The 30-day readmission rate in the cohort is [X]%.
-
-| Model | ROC-AUC | Brier (before calibration) | Brier (after Platt calibration) |
-|---|---:|---:|---:|
-| Logistic Regression (baseline) | 0.6610 | [X] | 0.0951 |
-| XGBoost (final model) | 0.6670 | [X] | 0.0942 |
+| Model                          | ROC-AUC | Brier (before calibration) | Brier (after Platt calibration) |
+| ------------------------------ | ------- | -------------------------- | ------------------------------- |
+| Logistic Regression (baseline) | 0.6610  | 0.2232                     | 0.0951                          |
+| XGBoost (final model)          | 0.6670  | 0.0942                     | 0.0942                          |
 
 ### How to read these metrics
 
