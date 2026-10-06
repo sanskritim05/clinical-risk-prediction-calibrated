@@ -172,11 +172,11 @@ Evaluated on a held-out test set of 15,078 encounters (70% train / 15% validatio
 
 ### Model choice
 
-XGBoost slightly outperformed logistic regression on both metrics and was exported as the final model. Logistic regression served as an interpretable baseline. The small gap suggests most of the predictive signal is captured by a linear relationship. [Add one sentence on why you kept XGBoost, e.g., better calibration or capturing feature interactions.]
+XGBoost slightly outperformed logistic regression on both discrimination metrics and was exported as the final model. Logistic regression served as an interpretable baseline. XGBoost was kept because it can capture non-linear effects and feature interactions while maintaining comparable calibrated probability performance.
 
 ### Explainability and subgroup evaluation
 
-SHAP values show which features drive each prediction. The top global drivers are [e.g., number of prior inpatient visits, discharge disposition, ...]. Performance was also checked across [age / sex / race] subgroups. [One sentence on what you found, e.g., whether AUC varied across groups.]
+SHAP values show which features drive each prediction. The top global drivers were discharge disposition categories, diagnosis groups, prior inpatient visits, age, and number of lab procedures. Performance was also checked across age and sex/gender subgroups. AUC was similar by gender, but varied across age groups, with lower AUC in older age brackets such as 80-90 and 90-100 compared with younger groups.
 
 ## Disclaimer
 
