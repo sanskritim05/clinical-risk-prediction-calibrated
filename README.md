@@ -101,22 +101,6 @@ Open `http://localhost:5173`.
 
 Optional: run the original FastAPI model locally with `uvicorn api.main:app --reload` after generating artifacts. The hosted Vercel app does not use this API.
 
-### Deploy on Vercel
-
-1. Push the repo to GitHub.
-2. Import it at [vercel.com/new](https://vercel.com/new).
-3. Vercel uses the root `vercel.json` (build `frontend`, output `frontend/dist`).
-4. Deploy. No environment variables are required.
-
-<!-- USAGE -->
-## Usage
-
-1. Open the dashboard in the browser.
-2. Choose `Patient directory` to inspect saved cohort patients, or `Manual assessment` to enter a new case.
-3. Review the predicted 30-day readmission risk.
-4. Inspect the explainability chart to see which features are driving the prediction.
-5. Optionally enable comparison mode to review patients side by side.
-
 ## Features
 
 * Self-contained dashboard that deploys on Vercel (no Python host required)
@@ -172,6 +156,28 @@ clinical-risk-prediction-calibrated/
 ├── README.md
 └── requirements.txt
 ```
+## Model Performance
+
+Evaluated on a held-out test set of [N] encounters ([X]% train / [X]% validation / [X]% test, split by [patient ID / random]). The 30-day readmission rate in the cohort is [X]%.
+
+| Model | ROC-AUC | Brier (before calibration) | Brier (after Platt calibration) |
+|---|---:|---:|---:|
+| Logistic Regression (baseline) | 0.6610 | [X] | 0.0951 |
+| XGBoost (final model) | 0.6670 | [X] | 0.0942 |
+
+### How to read these metrics
+
+- **ROC-AUC** measures how well the model ranks higher-risk patients above lower-risk ones (0.5 = random, 1.0 = perfect). Published 30-day readmission models typically fall between 0.60 and 0.70, because readmission depends heavily on factors not captured in hospital records, such as social support and post-discharge care.
+- **Brier score** measures how close predicted probabilities are to actual outcomes (lower is better). A model that always predicted the base rate would score about [p × (1 − p), using your readmission rate].
+- **Why calibration matters:** For a risk tool, a predicted 20% risk should mean roughly 20% of similar patients are readmitted. Platt calibration adjusts the raw model outputs so the probabilities can be trusted, not just the ranking.
+
+### Model choice
+
+XGBoost slightly outperformed logistic regression on both metrics and was exported as the final model. Logistic regression served as an interpretable baseline. The small gap suggests most of the predictive signal is captured by a linear relationship. [Add one sentence on why you kept XGBoost, e.g., better calibration or capturing feature interactions.]
+
+### Explainability and subgroup evaluation
+
+SHAP values show which features drive each prediction. The top global drivers are [e.g., number of prior inpatient visits, discharge disposition, ...]. Performance was also checked across [age / sex / race] subgroups. [One sentence on what you found, e.g., whether AUC varied across groups.]
 
 ## Disclaimer
 
